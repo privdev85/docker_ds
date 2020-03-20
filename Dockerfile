@@ -1,5 +1,9 @@
 FROM python:3.8.2-buster
 
+WORKDIR /usr/martin_bierey/docker_test
+
+COPY ./ /usr/martin_bierey/docker_test
+
 RUN apt-get update && apt-get install -y --no-install-recommends sudo apt-utils dialog
 RUN apt-get install -y --no-install-recommends gcc
 RUN apt-get update && apt-get -y --no-install-recommends install \
@@ -14,14 +18,16 @@ RUN python3 -m pip install virtualenv \
                            pipenv
 
 
-RUN set -eux; \
-	apt-get update; \
-	apt-get install -y gosu; \
-	rm -rf /var/lib/apt/lists/*; \
-# verify that the binary works
-	gosu nobody true
+RUN pip install -r requirements.txt
 
-COPY entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
+# Install jupyter
+RUN pip3 install jupyter
 
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+
+EXPOSE 8888
+
+VOLUME /usr/martin_bierey/docker_test
+
+CMD ["jupyter", "notebook", "--ip='*'", "--port=8888", "--no-browser", "--allow-root"]
+
+
